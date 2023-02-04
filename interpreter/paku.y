@@ -1,6 +1,6 @@
 /*
-	Calculadora v.4 - Lê de arquivos ou linha de comando
-	Jucimar Jr
+	Interpretador v.1 - Interpreta a linguagem paku
+	Lucas Cruz
 */
 
 %{
@@ -16,29 +16,45 @@ int yyparse();
 
 %token NUMBER EOL
 %token PLUS MINUS DIVIDE TIMES
-%token P_LEFT P_RIGHT POW MOD
+%token P_LEFT P_RIGHT POW MOD ASSIGNMENT PRINT
 
 %left PLUS MINUS
 %left TIMES DIVIDE
 %left POW MOD
-%left P_LEFT P_RIGHT 
+%left P_LEFT P_RIGHT ASSIGNMENT PRINT
 
 %%
+%union{
+	char[5] string;
+	float f;
+}
 
-STATEMENT:
-	STATEMENT EXPRESSION EOL {$$ = $2; printf("Resultado: %f\n", $2);}
+%type <string> STRING:
+	STRING PRINT P_LEFT EXPRESSION P_RIGHT EOL{$$ = $1; printf("%s", $1);}
+	|
 	|
 	;
 
-EXPRESSION:
-	NUMBER {$$ = $1;}
+% type <f> STATEMENT:
+	STATEMENT EXPRESSION EOL {$$ = $2;}
+	|	
+	|
+	;
+
+% type <f> EXPRESSION: NUMBER {$$ = $1;}
 	|	EXPRESSION PLUS EXPRESSION {$$ = $1 + $3;}
 	|	EXPRESSION MINUS EXPRESSION {$$ = $1 - $3;}
 	|	EXPRESSION TIMES EXPRESSION {$$ = $1 * $3;}
-	|	EXPRESSION DIVIDE EXPRESSION {$$ = $1 / $3;}
+	|	EXPRESSION DIVIDE EXPRESSION {
+										if($3 == 0)
+											yyerror("division by zero");
+										else
+											$$ = $1 / $3;
+										}
 	|	EXPRESSION POW EXPRESSION {$$ = pow($1, $3);}
 	|	EXPRESSION MOD EXPRESSION {$$ = fmod($1, $3);}
 	|	P_LEFT EXPRESSION P_RIGHT {$$ = $2;}
+	|	EXPRESSION ASSIGNMENT EXPRESSION {$$ = $1;}
 	;
 
 %%

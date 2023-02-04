@@ -1,11 +1,11 @@
 /*
-	Calculadora v.4 - Lê de arquivos ou linha de comando
-	Jucimar Jr
+	Interpretador v.1 - Interpreta a linguagem paku
+	Lucas Cruz
 */
 
 %{
 #define YYSTYPE double
-#include "calc.tab.h" 
+#include "paku.tab.h" 
 #include <stdlib.h>
 
 void yyerror(char *s); 
@@ -24,6 +24,9 @@ void yyerror(char *s);
 [[:space:]]			;
 [\^]				{ return POW;}
 [\%]				{ return MOD;}
+[\=]				{ return ASSIGNMENT;}
+['print_str']		{ return PRINT;}
+
 
 .					{ yyerror("Undefined token\n"); }
 
